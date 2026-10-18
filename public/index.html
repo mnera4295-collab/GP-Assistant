@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GP - مساعد منير</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #080d1c, #172b4d);
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .app {
+      width: 92%;
+      max-width: 500px;
+      padding: 25px;
+      border: 1px solid #00d9ff;
+      border-radius: 22px;
+      background: #192641;
+      text-align: center;
+      box-shadow: 0 0 30px #007bff55;
+    }
+    h1 { color: #00d9ff; font-size: 55px; margin: 5px; }
+    #messages {
+      height: 280px;
+      overflow-y: auto;
+      background: #101a2d;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: right;
+      margin: 20px 0;
+    }
+    .message { margin: 12px 0; line-height: 1.6; }
+    input {
+      width: 68%;
+      padding: 13px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 13px;
+      border: 0;
+      border-radius: 10px;
+      background: #00bfff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>GP</h1>
+    <p>مساعد منير الشخصي 🤖</p>
+
+    <div id="messages">
+      <div class="message">GP: أهلًا منير! أنا جاهز.</div>
+    </div>
+
+    <input id="input" placeholder
