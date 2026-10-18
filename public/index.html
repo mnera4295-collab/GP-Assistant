@@ -1,68 +1,114 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GP - مساعد منير</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #080d1c, #172b4d);
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .app {
-      width: 92%;
-      max-width: 500px;
-      padding: 25px;
-      border: 1px solid #00d9ff;
-      border-radius: 22px;
-      background: #192641;
-      text-align: center;
-      box-shadow: 0 0 30px #007bff55;
-    }
-    h1 { color: #00d9ff; font-size: 55px; margin: 5px; }
-    #messages {
-      height: 280px;
-      overflow-y: auto;
-      background: #101a2d;
-      border-radius: 12px;
-      padding: 12px;
-      text-align: right;
-      margin: 20px 0;
-    }
-    .message { margin: 12px 0; line-height: 1.6; }
-    input {
-      width: 68%;
-      padding: 13px;
-      border: 0;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 13px;
-      border: 0;
-      border-radius: 10px;
-      background: #00bfff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 5px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GP - مساعد منير</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg,#080d1c,#172b4d);
+  color: white;
+  font-family: Arial,sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+.app {
+  width: 100%;
+  max-width: 500px;
+  background: #192641;
+  border: 1px solid #00d9ff;
+  border-radius: 22px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 0 30px #007bff55;
+}
+h1 { color: #00d9ff; font-size: 60px; margin: 5px; }
+#messages {
+  height: 280px;
+  overflow-y: auto;
+  background: #101a2d;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: right;
+  margin: 20px 0;
+}
+.message { margin: 12px 0; line-height: 1.6; overflow-wrap: anywhere; }
+.controls { display: flex; gap: 8px; }
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 16px;
+}
+button {
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  background: #00bfff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:disabled { opacity: .6; }
+#status { color: #00d9ff; min-height: 22px; }
+</style>
 </head>
 <body>
-  <div class="app">
-    <h1>GP</h1>
-    <p>مساعد منير الشخصي 🤖</p>
+<div class="app">
+  <h1>GP</h1>
+  <p>مساعد منير الشخصي 🤖</p>
 
-    <div id="messages">
-      <div class="message">GP: أهلًا منير! أنا جاهز.</div>
-    </div>
+  <div id="messages">
+    <div class="message">GP: أهلًا منير! أنا جاهز.</div>
+  </div>
 
-    <input id="input" placeholder
+  <div class="controls">
+    <input id="input" placeholder="اكتب رسالتك هنا..." />
+    <button id="send">إرسال</button>
+    <button id="mic" title="تحدث">🎙️</button>
+  </div>
+  <p id="status"></p>
+</div>
+
+<script>
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const send = document.getElementById("send");
+const mic = document.getElementById("mic");
+const statusText = document.getElementById("status");
+
+function addMessage(sender, text) {
+  const div = document.createElement("div");
+  div.className = "message";
+  div.textContent = sender + ": " + text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function sendMessage() {
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage("منير", message);
+  input.value = "";
+  send.disabled = true;
+  statusText.textContent = "GP يفكر...";
+
+  try {
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message})
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error("Server error");
+
+    addMessage("GP", data.reply || "لم
