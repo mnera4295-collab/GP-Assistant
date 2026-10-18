@@ -1,102 +1,197 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GP - مساعد منير</title>
+
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg,#080d1c,#172b4d);
+  background: linear-gradient(135deg, #07152f, #123d75);
   color: white;
-  font-family: Arial,sans-serif;
+  font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 15px;
 }
+
 .app {
   width: 100%;
-  max-width: 500px;
-  background: #192641;
-  border: 1px solid #00d9ff;
-  border-radius: 22px;
-  padding: 25px;
+  max-width: 600px;
+  height: 85vh;
+  min-height: 450px;
+  background: #10294b;
+  border: 1px solid #2863a5;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px #0006;
+}
+
+header {
   text-align: center;
-  box-shadow: 0 0 30px #007bff55;
+  padding: 20px;
+  background: #17477d;
 }
-h1 { color: #00d9ff; font-size: 60px; margin: 5px; }
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin: 7px 0 0;
+  color: #c5ddff;
+}
+
 #messages {
-  height: 280px;
+  flex: 1;
   overflow-y: auto;
-  background: #101a2d;
-  border-radius: 12px;
-  padding: 12px;
-  text-align: right;
-  margin: 20px 0;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.message { margin: 12px 0; line-height: 1.6; overflow-wrap: anywhere; }
-.controls { display: flex; gap: 8px; }
+
+.message {
+  padding: 12px 15px;
+  border-radius: 14px;
+  max-width: 85%;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.user {
+  background: #1766b1;
+  align-self: flex-start;
+}
+
+.gp {
+  background: #263f60;
+  align-self: flex-end;
+}
+
+#status {
+  color: #b9d6f7;
+  text-align: center;
+  min-height: 25px;
+  font-size: 13px;
+  padding: 5px;
+}
+
+form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #0a1e38;
+}
+
 input {
   flex: 1;
   min-width: 0;
   padding: 13px;
-  border: 0;
-  border-radius: 10px;
-  font-size: 16px;
-}
-button {
-  padding: 13px;
-  border: 0;
-  border-radius: 10px;
-  background: #00bfff;
+  border: 1px solid #477db5;
+  border-radius: 12px;
+  background: #173657;
   color: white;
-  font-weight: bold;
+  font-size: 16px;
+  outline: none;
+}
+
+input::placeholder {
+  color: #b4c6da;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: white;
+  background: #1676d2;
+  font-size: 16px;
   cursor: pointer;
 }
-button:disabled { opacity: .6; }
-#status { color: #00d9ff; min-height: 22px; }
+
+button:disabled {
+  opacity: 0.5;
+}
+
+#mic {
+  background: #168b78;
+}
 </style>
 </head>
+
 <body>
 <div class="app">
-  <h1>GP</h1>
-  <p>مساعد منير الشخصي 🤖</p>
+
+  <header>
+    <h1>GP</h1>
+    <p>مساعد منير الشخصي</p>
+  </header>
 
   <div id="messages">
-    <div class="message">GP: أهلًا منير! أنا جاهز.</div>
+    <div class="message gp">أهلًا! أنا GP، كيف أقدر أساعدك؟</div>
   </div>
 
-  <div class="controls">
-    <input id="input" placeholder="اكتب رسالتك هنا..." />
-    <button id="send">إرسال</button>
-    <button id="mic" title="تحدث">🎙️</button>
-  </div>
-  <p id="status"></p>
+  <div id="status">جاهز للمحادثة</div>
+
+  <form id="chatForm">
+    <input
+      id="input"
+      type="text"
+      placeholder="اكتب رسالتك هنا..."
+      autocomplete="off"
+    >
+    <button id="send" type="submit">إرسال</button>
+    <button id="mic" type="button">🎙️</button>
+  </form>
+
 </div>
 
 <script>
-const messages = document.getElementById("messages");
+const form = document.getElementById("chatForm");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const mic = document.getElementById("mic");
+const messages = document.getElementById("messages");
 const statusText = document.getElementById("status");
 
 function addMessage(sender, text) {
   const div = document.createElement("div");
-  div.className = "message";
-  div.textContent = sender + ": " + text;
+  div.className = "message " + (sender === "أنت" ? "user" : "gp");
+  div.textContent = text;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
 
-async function sendMessage() {
-  const message = input.value.trim();
-  if (!message) return;
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
 
-  addMessage("منير", message);
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "ar-JO";
+  speechSynthesis.speak(speech);
+}
+
+form.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const message = input.value.trim();
+  if (!message) {
+    input.focus();
+    return;
+  }
+
+  addMessage("أنت", message);
   input.value = "";
   send.disabled = true;
   statusText.textContent = "GP يفكر...";
@@ -104,11 +199,72 @@ async function sendMessage() {
   try {
     const response = await fetch("/chat", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message})
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: message })
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error("Server error");
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
 
-    addMessage("GP", data.reply || "لم
+    const data = await response.json();
+    const reply = data.reply || "وصلتني رسالتك.";
+
+    addMessage("GP", reply);
+    speak(reply);
+    statusText.textContent = "جاهز للمحادثة";
+
+  } catch (error) {
+    addMessage("GP", "تعذر الاتصال بالخادم. حاول مرة أخرى.");
+    statusText.textContent = "خطأ في الاتصال: " + error.message;
+  } finally {
+    send.disabled = false;
+    input.focus();
+  }
+});
+
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = "ar-JO";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  mic.addEventListener("click", function() {
+    try {
+      statusText.textContent = "أنا أستمع...";
+      recognition.start();
+    } catch (error) {
+      statusText.textContent = "انتظر قليلًا ثم جرّب المايك.";
+    }
+  });
+
+  recognition.onresult = function(event) {
+    input.value = event.results[0][0].transcript;
+    statusText.textContent = "تم التعرف على كلامك";
+    input.focus();
+  };
+
+  recognition.onerror = function() {
+    statusText.textContent = "تعذر استخدام المايك. تحقق من إذن الميكروفون.";
+  };
+
+  recognition.onend = function() {
+    if (statusText.textContent === "أنا أستمع...") {
+      statusText.textContent = "جاهز للمحادثة";
+    }
+  };
+
+} else {
+  mic.addEventListener("click", function() {
+    statusText.textContent = "المتصفح لا يدعم التعرف على الصوت.";
+  });
+}
+</script>
+
+</body>
+</html>
