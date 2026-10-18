@@ -1,20 +1,27 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// عرض واجهة GP
+app.use(express.static(path.join(__dirname, "public")));
+
 app.get("/", (req, res) => {
-  res.send("GP is online! Welcome, Munir.");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// استقبال رسائل منير
 app.post("/chat", (req, res) => {
   const message = req.body.message;
 
   if (!message) {
-    return res.status(400).json({ reply: "احكيلي يا منير، شو بدك؟" });
+    return res.status(400).json({
+      reply: "احكيلي يا منير، شو بدك؟"
+    });
   }
 
   res.json({
